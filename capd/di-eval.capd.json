@@ -1,0 +1,23 @@
+{
+  "name": "di-eval",
+  "version": "0.1.0",
+  "omega_thresholds": {
+    "cbd_norm": 0.6,
+    "cbd_link": 0.75,
+    "cgt_trust": 0.7,
+    "nhy_deliver": 0.8
+  },
+  "weight_model": "degree",
+  "policies": [
+    "omega.rego",
+    "repair.rego"
+  ],
+  "schemas": [
+    "kfs-eval.json"
+  ],
+  "semantics": {
+    "ieml_dict": true
+  },
+  "license": "MIT",
+  "generated_at": "2026-01-08T00:00:00Z"
+}

@@ -1,0 +1,5 @@
+- name: "quick-promo"
+  expect: {steps_max: 6}
+
+- name: "slow-promo"
+  expect: {steps_max: 8}

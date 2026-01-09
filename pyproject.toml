@@ -1,0 +1,30 @@
+[project]
+name = "human-digital-twin"
+version = "0.1.0"
+description = "Human Digital Twin (HDT) protocol kit: Ω evaluation lattice, policy hooks, TritRPC surface, and reproducible test harness."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name="SocioProphet contributors"}]
+dependencies = [
+  "pyyaml>=6.0.1",
+  "jsonschema>=4.22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "ruff>=0.5.0",
+]
+
+[project.scripts]
+hdt-pathflows = "human_digital_twin.tools.pathflows.runner:main"
+hdt-shim = "human_digital_twin.api.trpc.server_shim:main"
+
+[build-system]
+requires = ["setuptools>=69.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["human_digital_twin*"]

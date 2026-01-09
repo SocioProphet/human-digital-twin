@@ -1,0 +1,44 @@
+version: 0.2
+service: DevineIntelligence
+transport:
+  kind: tritrpc
+  # Reference address for local testing (UDS). Real deployments set this via runtime config.
+  address: unix:///tmp/devine_intel.sock
+
+# Notes:
+# - TritRPC is our wire-format-first contract layer.
+# - This YAML is intentionally transport-agnostic; the "shim" server is ONLY for local demos.
+rpcs:
+  - name: Evaluate
+    req:
+      resource_id: string   # optional handle (runtime-defined); MAY be empty
+      prev: string          # previous omega state; default "ABSENT"
+      kfs: {m_cbd: number, m_cgt: number, m_nhy: number}
+    res:
+      omega: string
+      prev: string
+      next: string
+      m_cbd: number
+      m_cgt: number
+      m_nhy: number
+      reasons: [string]
+
+  - name: Promote
+    req:
+      resource_id: string
+      prev: string
+      kfs: {m_cbd: number, m_cgt: number, m_nhy: number}
+    res:
+      prev: string
+      next: string
+      omega: string
+      repair: [string]
+
+  - name: WorldWeights
+    req: {strategy: string, edges: [[string,string]]}
+    res: {w_model: string, worlds: [{id: string, w: number}]}
+
+  - name: MirrorSelf
+    # Stub for a "self-mirroring" operation; we keep it because it sketches a future introspection path.
+    req: {agent_id: string, snapshot_b64: string}
+    res: {ack: bool, omega_self: string}

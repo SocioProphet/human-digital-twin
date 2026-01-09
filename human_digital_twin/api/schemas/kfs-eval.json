@@ -1,0 +1,68 @@
+{
+  "$id": "https://socioprophet.dev/schema/kfs-eval.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KFS \u03a9 Evaluation Extension",
+  "description": "A minimal, \u03a9-evaluable extension: an (url,valueCoding) pair plus metric sub-extensions (m_cbd,m_cgt,m_nhy). Modeled after a FHIR Extension style but deliberately minimal.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "const": "https://socioprophet.dev/ext/kfs-eval"
+    },
+    "valueCoding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "system": {
+          "const": "\u03a9"
+        },
+        "code": {
+          "enum": [
+            "ABSENT",
+            "SEEDED",
+            "NORMALIZED",
+            "LINKED",
+            "TRUSTED",
+            "ACTIONABLE",
+            "DELIVERED"
+          ]
+        }
+      },
+      "required": [
+        "system",
+        "code"
+      ]
+    },
+    "extension": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "enum": [
+              "m_cbd",
+              "m_cgt",
+              "m_nhy"
+            ]
+          },
+          "valueDecimal": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          }
+        },
+        "required": [
+          "url",
+          "valueDecimal"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "url",
+    "valueCoding",
+    "extension"
+  ]
+}
