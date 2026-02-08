@@ -1,5 +1,13 @@
 # Human Digital Twin (HDT) — Ω Protocol Kit
 
+**Repository description:** A protocol + reference implementation that defines a minimal, reproducible “human API” surface
+for evaluating, promoting, and exporting human-centric artifacts under zero-trust constraints.
+
+**Topic tags (for discoverability):**
+human-digital-twin, omega-protocol, protocol, zero-trust, privacy, consent, provenance, governance, policy, opa, rego,
+json-schema, tritrpc, lattice, evaluation, compliance, audit, data-minimization, capability-descriptors, fhir,
+interoperability, digital-identity, security, reliability, evidence, trust.
+
 This repository is a **protocol + reference implementation**: we define a minimal, reproducible “human API” surface
 for *evaluating*, *promoting*, and *exporting* human-centric artifacts (observations, consented exports, capability proofs)
 under **zero-trust** constraints.
@@ -14,6 +22,30 @@ The kit is intentionally modular:
 
 Nothing here is “the product.” It’s the **shared contract** we can embed into SourceOS/Sociosphere-style systems:
 policy-guarded, audit-evidenced, human-consented, and composable.
+
+---
+
+## Documentation map
+
+Start here if you are new to the project:
+
+- **README (this file):** Quick mental model, repo layout, and how to run the examples.
+- **Theory and foundations:** `docs/theory.md` — deeper rationale, terms, and design trade-offs.
+- **Best practices:** `docs/best_practices.md` — operational and safety guidance.
+
+If you want to build or integrate:
+
+- **Schemas:** `human_digital_twin/api/schemas/kfs-eval.json`
+- **Policies:** `human_digital_twin/api/policies/opa/`
+- **API contract:** `human_digital_twin/api/trpc/devine.trpc.yaml`
+
+---
+
+## Who this is for
+
+- **Platform engineers** who need a deterministic, testable promotion engine plus policy gates.
+- **Privacy and governance teams** who want export decisions grounded in explicit consent and evidence.
+- **Researchers and standards authors** exploring verifiable, minimal human-centric projections.
 
 ---
 
