@@ -1,7 +1,23 @@
 # Human Digital Twin (HDT) — Ω Protocol Kit
 
-**Repository description:** A protocol + reference implementation that defines a minimal, reproducible “human API” surface
-for evaluating, promoting, and exporting human-centric artifacts under zero-trust constraints.
+## Summary
+
+A protocol + reference implementation for a minimal, reproducible “human API” surface that evaluates, promotes, and
+exports human-centric artifacts under zero-trust constraints.
+
+## Description
+
+Human Digital Twin (HDT) defines the Ω evaluation lattice, policy hooks, TritRPC surface, and test harness for
+human-centric artifacts such as observations, consented exports, and capability proofs.
+
+## About
+
+- **Description:** Human Digital Twin (HDT) protocol kit: Ω evaluation lattice, policy hooks, TritRPC surface, and
+  reproducible test harness.
+- **Website:** https://github.com/SocioProphet/human-digital-twin
+- **Topics:** human-digital-twin, omega-protocol, protocol, zero-trust, privacy, consent, provenance, governance, policy,
+  opa, rego, json-schema, tritrpc, lattice, evaluation, compliance, audit, data-minimization,
+  capability-descriptors, fhir, interoperability, digital-identity, security, reliability, evidence, trust.
 
 **Topic tags (for discoverability):**
 human-digital-twin, omega-protocol, protocol, zero-trust, privacy, consent, provenance, governance, policy, opa, rego,
