@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socioprophet.local/hdt/spec/policy/approval_event_schema.json",
+  "title": "Human Digital Twin Policy / Approval Event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "trace_id",
+    "span_id",
+    "event_type",
+    "ts",
+    "producer",
+    "payload"
+  ],
+  "properties": {
+    "event_id": { "type": "string" },
+    "trace_id": { "type": "string" },
+    "span_id": { "type": "string" },
+    "parent_span_id": { "type": "string" },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "policy.evaluated",
+        "approval.requested",
+        "approval.granted",
+        "approval.denied",
+        "consent.checked"
+      ]
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "producer": {
+      "type": "string",
+      "const": "human-digital-twin"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "policy_bundle_id": { "type": "string" },
+        "policy_pass": { "type": "boolean" },
+        "risk_class": { "type": "string" },
+        "approval_required": { "type": "boolean" },
+        "human_approved": { "type": "boolean" },
+        "consent_state": { "type": "string" },
+        "approval_ref": { "type": "string" },
+        "attestation_ref": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "required": ["policy_bundle_id"]
+    }
+  }
+}
