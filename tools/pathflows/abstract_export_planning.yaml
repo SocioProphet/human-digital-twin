@@ -1,0 +1,70 @@
+scenario_id: hdt-abstract-export-repair-001
+name: abstract-export-repair
+
+benchmark_case:
+  case_id: hdt.abstract.case.001
+  workload_id: A08
+  family: SYNTHETIC_BACKTRACK
+  representation_mode: symbolic
+  answer_mode: program_induction
+  contamination_risk: low
+  example_count: 4
+  source_ref: docs/planning-pilot.md
+
+policy:
+  policy_id: branch-admissibility-abstract-default
+  version: 0.1.0
+  reasoningClass: ABSTRACT
+  llmOnlyForbidden: true
+  requiresProgramCandidate: true
+  requiresCounterexampleSearch: true
+  requiresBacktrackingCapability: true
+  minimumVerificationMode: COUNTEREXAMPLE_SEARCH
+
+belief_state:
+  state_id: state.hdt.consent.stale.001
+  subject_ref: hdt://subject/demo-user-001
+  state_hash: sha256:belief-state-consent-stale-001
+  truth_class: OBSERVED
+  scope: TENANT
+  supporting_artifact_refs:
+    - evidence://hdt/consent/record-2026-04-01
+
+plan:
+  scope_ref: planning.scope.hdt.export.001
+  reasoning_class: ABSTRACT
+  verification_mode: COUNTEREXAMPLE_SEARCH
+  selected_candidate: repair-consent
+
+program_candidate:
+  program_candidate_id: progcand.hdt.export.001
+  status: EXECUTED
+  candidate_language: PYTHON
+  candidate_text: |
+    def rule(x):
+      return refresh_consent(x)
+  compile_result:
+    compiled: true
+    compiler_output: ""
+  execution_result:
+    executed: true
+    passed_case_count: 4
+    failed_case_count: 1
+
+counterexample:
+  counterexample_id: counterexample.hdt.export.001
+  target_ref: progcand.hdt.export.001
+  result: FOUND
+  reason: candidate passes compile but fails freshness semantics
+
+gate_expectation:
+  llm_only_branch: deny
+  verified_repair_branch: allow
+
+report_expectation:
+  status: review_required
+  required_metrics:
+    - semantic_accuracy
+    - compile_rate
+    - compile_semantic_gap
+    - counterexample_resistance
