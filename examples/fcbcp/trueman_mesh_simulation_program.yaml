@@ -1,0 +1,75 @@
+program:
+  header:
+    name: vm_to_rna_proxy_research_fixture_v0
+    target: synthetic_forearm_patch
+    objective: transcript_proxy_research
+    horizon_s: 7200
+    context: simulation
+  policy:
+    human_actuation: blocked_by_default
+    evidence_tier: E2
+    status: SAFE_TO_SIMULATE
+    notes:
+      - Simulation-only fixture.
+      - Not a human protocol.
+      - Not a device-control program.
+      - Requires HPL and policy review before any non-simulation use.
+  claim_boundary:
+    excluded_mechanisms:
+      - phantom_dna_field
+      - semantic_wave_text
+      - dna_inductor
+      - dna_speaker_microphone
+      - holographic_gene_laser
+      - native_dna_biological_magnet
+      - geometry_implies_circuit_element
+    metaphor_only_allowed:
+      - dna_as_storage
+      - rna_as_code
+      - human_as_computer
+  safety:
+    human_actuation: blocked_by_default
+    raw_private_evidence_export: blocked_by_default
+    dVm_cap_mV: 0.5
+    thermal_cap_C: required
+    cumulative_thermal_dose_cap: required
+    duty_cap: required
+    uncertainty_margin: required
+  blocks:
+    - kind: CALIBRATE
+      block_id: B0
+      region: synthetic_forearm_patch
+      duration_s: 300
+      parameters:
+        measurement: impedance_sweep
+      policy_status: SAFE_TO_SIMULATE
+    - kind: WAVE
+      block_id: B1
+      region: synthetic_forearm_patch
+      duration_s: 1200
+      parameters:
+        frequency_hz: symbolic
+        amplitude: auto_by_safety_cap
+        phase_rad: 0
+      safety:
+        dVm_cap_mV: 0.5
+        thermal_cap_C: required
+      policy_status: SAFE_TO_SIMULATE
+    - kind: QUIET
+      block_id: B2
+      region: synthetic_forearm_patch
+      duration_s: 1800
+      parameters:
+        measurement_window: true
+      policy_status: SAFE_TO_SIMULATE
+  expected_outputs:
+    - simulated_transfer_estimate
+    - simulated_driver_trace
+    - simulated_timing_metadata
+    - hpl_status
+    - policy_decision
+  forbidden_outputs:
+    - live_device_command
+    - human_actuation_authorization
+    - raw_private_evidence_export
+    - validated_biological_mechanism_claim
