@@ -1,0 +1,133 @@
+{
+  "$id": "https://socioprophet.dev/schema/fcbcp/research-session.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FCBCP Research Session",
+  "description": "Research-only FCBCP session envelope. Human actuation is blocked by default.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "session_id": {"type": "string", "minLength": 1},
+    "program_id": {"type": "string", "minLength": 1},
+    "profile_id": {"const": "hdt.fcbcp-research.v0"},
+    "context": {"enum": ["simulation", "synthetic", "phantom", "ex_vivo", "reviewed_external_process"]},
+    "evidence_tier": {"enum": ["E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "unknown"]},
+    "hypotheses": {
+      "type": "array",
+      "items": {"enum": ["H1", "H2", "H3", "H4", "H5", "other"]},
+      "minItems": 1
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mechanism_label": {"type": "string"},
+        "mechanism_status": {"enum": ["validated", "research_hypothesis", "metaphor_only", "speculative_only", "excluded_mechanism", "unknown"]},
+        "unsupported_claim_blocked": {"type": "boolean"}
+      },
+      "required": ["mechanism_status", "unsupported_claim_blocked"]
+    },
+    "human_protection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "human_actuation": {"enum": ["blocked_by_default", "blocked", "simulation_only", "external_review_required"]},
+        "raw_private_evidence_export": {"const": "blocked_by_default"},
+        "consent_required": {"type": "boolean"},
+        "redress_required": {"type": "boolean"}
+      },
+      "required": ["human_actuation", "raw_private_evidence_export"]
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dose_model_required": {"type": "boolean"},
+        "thermal_model_required": {"type": "boolean"},
+        "dVm_cap_mV": {"type": "number", "minimum": 0},
+        "dT_cap_C": {"type": "number", "minimum": 0},
+        "SAR_cap_Wkg": {"type": "number", "minimum": 0},
+        "MI_cap": {"type": "number", "minimum": 0},
+        "uncertainty_margin_required": {"type": "boolean"}
+      },
+      "required": ["dose_model_required", "thermal_model_required", "uncertainty_margin_required"]
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expected_driver_latency": {"type": "string"},
+        "expected_second_messenger_latency": {"type": "string"},
+        "expected_rna_latency": {"type": "string"},
+        "sampling_times": {"type": "array", "items": {"type": "string"}},
+        "falsification_condition": {"type": "string", "minLength": 1}
+      },
+      "required": ["falsification_condition"]
+    },
+    "statistical_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {"type": "string", "minLength": 1},
+        "model_class": {"type": "string"},
+        "power_analysis_required": {"type": "boolean"},
+        "multiple_comparison_plan": {"type": "string"}
+      },
+      "required": ["endpoint", "power_analysis_required"]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision": {"enum": ["allow", "deny", "block", "needs_review"]},
+        "status": {"type": "string", "minLength": 1},
+        "reasons": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["decision", "status", "reasons"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_refs": {"type": "array", "items": {"type": "string"}},
+        "evidence_hash": {"type": "string", "minLength": 1},
+        "policy_version": {"type": "string", "minLength": 1}
+      },
+      "required": ["evidence_hash", "policy_version"]
+    }
+  },
+  "required": [
+    "session_id",
+    "program_id",
+    "profile_id",
+    "context",
+    "evidence_tier",
+    "hypotheses",
+    "claim_boundary",
+    "human_protection",
+    "safety",
+    "timing",
+    "policy",
+    "provenance"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "claim_boundary": {
+            "properties": {"mechanism_status": {"const": "excluded_mechanism"}},
+            "required": ["mechanism_status"]
+          }
+        },
+        "required": ["claim_boundary"]
+      },
+      "then": {
+        "properties": {
+          "policy": {
+            "properties": {"decision": {"enum": ["block", "deny", "needs_review"]}},
+            "required": ["decision"]
+          }
+        }
+      }
+    }
+  ]
+}
