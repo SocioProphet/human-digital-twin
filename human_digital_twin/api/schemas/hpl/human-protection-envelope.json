@@ -1,0 +1,167 @@
+{
+  "$id": "https://socioprophet.dev/schema/hpl/human-protection-envelope.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Human Protection Layer Envelope",
+  "description": "Minimal envelope for human-impacting HDT/Atlas/FCBCP outputs. Validity is not permission; policy status is mandatory.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "program_id": {"type": "string", "minLength": 1},
+    "profile_id": {"type": "string", "minLength": 1},
+    "resource_id": {"type": "string"},
+    "omega_state": {
+      "enum": ["ABSENT", "SEEDED", "NORMALIZED", "LINKED", "TRUSTED", "ACTIONABLE", "DELIVERED"]
+    },
+    "subject_scope": {
+      "enum": ["none", "individual", "group", "population", "bystander_possible"]
+    },
+    "protected_person_risk": {
+      "enum": ["low", "medium", "high", "critical", "unknown"]
+    },
+    "evidence_tier": {
+      "enum": ["E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "unknown"]
+    },
+    "status": {"type": "string", "minLength": 1},
+    "claim": {"type": "string"},
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mechanism_status": {
+          "enum": ["validated", "hypothesis", "research_hypothesis", "metaphor_only", "speculative_only", "excluded", "excluded_mechanism", "unknown"]
+        },
+        "mechanism_label": {"type": "string"},
+        "unsupported_claim_blocked": {"type": "boolean"}
+      },
+      "required": ["mechanism_status", "unsupported_claim_blocked"]
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {"type": "boolean"},
+        "present": {"type": "boolean"},
+        "scope": {"type": "array", "items": {"type": "string"}},
+        "revocable": {"type": "boolean"},
+        "receipt_ref": {"type": "string"}
+      },
+      "required": ["required", "present", "scope"],
+      "allOf": [
+        {
+          "if": {"properties": {"required": {"const": true}}, "required": ["required"]},
+          "then": {"properties": {"present": {"const": true}}, "required": ["present"]}
+        }
+      ]
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw_private_evidence_attached": {"const": false},
+        "minimization_basis": {"type": "string", "minLength": 1},
+        "private_local_only": {"type": "boolean"}
+      },
+      "required": ["raw_private_evidence_attached", "minimization_basis"]
+    },
+    "physical_safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "human_actuation": {
+          "enum": ["blocked", "blocked_by_default", "simulation_only", "protocol_required", "approved_external_process"]
+        },
+        "dose_model_required": {"type": "boolean"},
+        "thermal_model_required": {"type": "boolean"}
+      },
+      "required": ["human_actuation"]
+    },
+    "cognitive_safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hidden_persuasion": {"enum": ["blocked", "not_applicable"]},
+        "high_impact_decision": {"enum": ["blocked", "review_required", "approved_external_process", "not_applicable"]}
+      },
+      "required": ["hidden_persuasion", "high_impact_decision"]
+    },
+    "misuse_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required": {"type": "boolean"},
+        "completed": {"type": "boolean"}
+      },
+      "required": ["required", "completed"]
+    },
+    "redress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inspect": {"type": "boolean"},
+        "challenge": {"type": "boolean"},
+        "revoke": {"type": "boolean"},
+        "appeal": {"type": "boolean"}
+      },
+      "required": ["inspect", "challenge", "revoke", "appeal"]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision": {"enum": ["allow", "deny", "block", "needs_review"]},
+        "reasons": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["decision", "reasons"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "evidence_hash": {"type": "string", "minLength": 1},
+        "policy_version": {"type": "string", "minLength": 1},
+        "reviewer_or_process": {"type": "string"}
+      },
+      "required": ["evidence_hash", "policy_version"]
+    }
+  },
+  "required": [
+    "program_id",
+    "profile_id",
+    "subject_scope",
+    "protected_person_risk",
+    "evidence_tier",
+    "status",
+    "claim_boundary",
+    "consent",
+    "privacy",
+    "physical_safety",
+    "cognitive_safety",
+    "misuse_review",
+    "redress",
+    "policy",
+    "provenance"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "claim_boundary": {
+            "properties": {
+              "mechanism_status": {"enum": ["excluded", "excluded_mechanism", "speculative_only", "unknown"]}
+            },
+            "required": ["mechanism_status"]
+          }
+        },
+        "required": ["claim_boundary"]
+      },
+      "then": {
+        "properties": {
+          "policy": {
+            "properties": {"decision": {"enum": ["block", "deny", "needs_review"]}},
+            "required": ["decision"]
+          }
+        }
+      }
+    }
+  ]
+}
