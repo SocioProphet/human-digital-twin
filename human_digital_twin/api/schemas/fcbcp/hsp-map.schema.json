@@ -1,0 +1,201 @@
+{
+  "$id": "https://socioprophet.dev/schema/fcbcp/hsp-map.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HSP-Map Entry",
+  "description": "Research-only Human Surface-Penetration Map entry. Human actuation is blocked by default.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "region_id": {"type": "string", "minLength": 1},
+    "region_name": {
+      "enum": [
+        "scalp",
+        "forehead_face",
+        "neck",
+        "anterior_chest",
+        "back",
+        "upper_arm",
+        "forearm",
+        "palm",
+        "dorsal_hand",
+        "fingertips",
+        "abdomen",
+        "lower_back_flank",
+        "thigh",
+        "knee_patella",
+        "calf",
+        "sole",
+        "dorsal_foot_ankle",
+        "perineum_axilla"
+      ]
+    },
+    "subject_scope": {"enum": ["synthetic", "phantom", "ex_vivo", "individual", "population"]},
+    "evidence_tier": {"enum": ["E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "unknown"]},
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "d_SC_m": {"type": "number", "minimum": 0},
+        "d_epi_m": {"type": "number", "minimum": 0},
+        "d_derm_m": {"type": "number", "minimum": 0},
+        "d_fat_m": {"type": "number", "minimum": 0},
+        "d_muscle_m": {"type": "number", "minimum": 0},
+        "d_bone_m": {"type": "number", "minimum": 0},
+        "area_m2": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "required": ["d_SC_m", "d_epi_m", "d_derm_m", "d_fat_m", "d_muscle_m", "d_bone_m"]
+    },
+    "dielectric": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "layers": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "per_layer": {"type": "object"}
+      },
+      "required": ["layers", "per_layer"]
+    },
+    "thermal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rho_kg_m3": {"type": "number", "exclusiveMinimum": 0},
+        "c_J_kgK": {"type": "number", "exclusiveMinimum": 0},
+        "k_W_mK": {"type": "number", "exclusiveMinimum": 0},
+        "omega_blood": {"type": "number", "minimum": 0},
+        "T_baseline_C": {"type": "number"}
+      },
+      "required": ["rho_kg_m3", "c_J_kgK", "k_W_mK", "T_baseline_C"]
+    },
+    "optical": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {"enum": ["measured", "literature", "synthetic", "phantom", "unknown"]},
+        "table": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "lambda_nm": {"type": "number", "minimum": 1},
+              "mu_a_mm_inv": {"type": "number", "minimum": 0},
+              "mu_s_prime_mm_inv": {"type": "number", "minimum": 0},
+              "g": {"type": "number", "minimum": 0, "maximum": 1}
+            },
+            "required": ["lambda_nm", "mu_a_mm_inv", "mu_s_prime_mm_inv"]
+          }
+        }
+      },
+      "required": ["source", "table"]
+    },
+    "acoustic": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rho_ac_kg_m3": {"type": "number", "exclusiveMinimum": 0},
+        "c_m_s": {"type": "number", "exclusiveMinimum": 0},
+        "Z_ac": {"type": "number", "minimum": 0},
+        "source": {"enum": ["measured", "literature", "synthetic", "phantom", "unknown"]}
+      },
+      "required": ["rho_ac_kg_m3", "c_m_s", "source"]
+    },
+    "microstructure": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "lumped_fit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "R_SC_ohm": {"type": "number", "minimum": 0},
+        "C_SC_F": {"type": "number", "minimum": 0},
+        "R_deep_ohm": {"type": "number", "minimum": 0},
+        "fit_status": {"enum": ["measured", "modeled", "synthetic", "phantom", "unknown"]}
+      },
+      "required": ["fit_status"]
+    },
+    "transfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fit_status": {"enum": ["measured", "modeled", "synthetic", "phantom", "unknown"]},
+        "T_omega": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "f_hz": {"type": "number", "minimum": 0},
+              "magnitude": {"type": "number", "minimum": 0},
+              "phase_rad": {"type": "number"}
+            },
+            "required": ["f_hz", "magnitude"]
+          }
+        }
+      },
+      "required": ["fit_status", "T_omega"]
+    },
+    "coupling": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "age_scalars": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "class": {"enum": ["neonate", "child", "adult", "older_adult", "unknown"]}
+      }
+    },
+    "safety_caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dVm_max_mV": {"type": "number", "minimum": 0},
+        "SAR_Wkg": {"type": "number", "minimum": 0},
+        "MI_max": {"type": "number", "minimum": 0},
+        "dT_max_C": {"type": "number", "minimum": 0},
+        "Omega_max": {"type": "number", "minimum": 0},
+        "human_actuation": {"enum": ["blocked_by_default", "blocked", "simulation_only"]}
+      },
+      "required": ["human_actuation"]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "measurement_dates": {"type": "array", "items": {"type": "string"}},
+        "device_ids": {"type": "array", "items": {"type": "string"}},
+        "calibration_hashes": {"type": "array", "items": {"type": "string"}},
+        "source_refs": {"type": "array", "items": {"type": "string"}},
+        "evidence_hash": {"type": "string", "minLength": 1},
+        "policy_version": {"type": "string", "minLength": 1}
+      },
+      "required": ["evidence_hash", "policy_version"]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "human_actuation": {"enum": ["blocked_by_default", "blocked", "simulation_only"]},
+        "raw_private_evidence_export": {"const": "blocked_by_default"}
+      },
+      "required": ["human_actuation", "raw_private_evidence_export"]
+    }
+  },
+  "required": [
+    "region_id",
+    "region_name",
+    "subject_scope",
+    "evidence_tier",
+    "geometry",
+    "dielectric",
+    "thermal",
+    "optical",
+    "acoustic",
+    "lumped_fit",
+    "transfer",
+    "safety_caps",
+    "provenance",
+    "policy"
+  ]
+}
