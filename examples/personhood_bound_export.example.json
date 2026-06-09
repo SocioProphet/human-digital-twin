@@ -1,0 +1,41 @@
+{
+  "record_type": "PersonhoodBoundExportReadiness",
+  "schema_version": "0.1.0",
+  "export_id": "pber_example_alpha",
+  "subject_ref": "sub_example_alpha",
+  "personhood_binding_ref": "pbr_example_alpha",
+  "identity_sigil_seal_ref": "iss_example_alpha",
+  "binding_scope": "identity_mesh_root",
+  "assurance_level": "P3_guardian_or_witness_supported",
+  "allowed_purpose": "agentic_work_identity_advisory_verification",
+  "recipient_ref": "recipient://example-client/advisory",
+  "omega_state": "TRUSTED",
+  "policy_decision_ref": "policy://personhood-export/advisory-allowed-v1",
+  "evidence_class_summary": [
+    "self_attestation",
+    "liveness_or_presence",
+    "guardian_or_witness_attestation",
+    "recovery_policy",
+    "revocation_policy"
+  ],
+  "raw_evidence_refs_exported": false,
+  "withheld_raw_evidence_classes": [
+    "guardian_refs",
+    "credential_refs",
+    "wallet_refs",
+    "portrait_refs",
+    "recovery_graph"
+  ],
+  "valid_from": "2026-05-04T18:40:00Z",
+  "valid_to": "2026-06-04T18:40:00Z",
+  "revocation_status_ref": "revocation://example-alpha/status-v1",
+  "repair_ref": null,
+  "transition_receipt_ref": "tr_initial_001",
+  "non_claims": [
+    "Personhood-bound export does not make any wallet the person.",
+    "Personhood-bound export does not make any portrait biometric proof by default.",
+    "Personhood-bound export does not make any account, device, credential, agent, graph edge, or reputation record equivalent to the person.",
+    "Personhood-bound export does not authorize public correlation of all identity contexts.",
+    "Personhood-bound export does not reveal raw ceremony evidence unless separately authorized."
+  ]
+}
