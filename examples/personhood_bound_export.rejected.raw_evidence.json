@@ -1,0 +1,39 @@
+{
+  "record_type": "PersonhoodBoundExportReadiness",
+  "schema_version": "0.1.0",
+  "export_id": "pber_rejected_raw_evidence",
+  "subject_ref": "sub_example_alpha",
+  "personhood_binding_ref": "pbr_example_alpha",
+  "identity_sigil_seal_ref": "iss_example_alpha",
+  "binding_scope": "identity_mesh_root",
+  "assurance_level": "P3_guardian_or_witness_supported",
+  "allowed_purpose": "public_profile_display",
+  "recipient_ref": "recipient://public-web",
+  "omega_state": "ACTIONABLE",
+  "policy_decision_ref": "policy://personhood-export/rejected-raw-evidence-v1",
+  "evidence_class_summary": [
+    "self_attestation",
+    "liveness_or_presence",
+    "guardian_or_witness_attestation",
+    "recovery_policy",
+    "revocation_policy"
+  ],
+  "raw_evidence_refs_exported": true,
+  "raw_evidence_refs": [
+    "ev_guardian_attestation_001",
+    "wallet:eip155:1:0x0000000000000000000000000000000000000000",
+    "portrait://example-alpha/raw-face-image",
+    "recovery://example-alpha/policy-v1"
+  ],
+  "withheld_raw_evidence_classes": [],
+  "valid_from": "2026-05-04T18:40:00Z",
+  "valid_to": null,
+  "revocation_status_ref": null,
+  "repair_ref": null,
+  "transition_receipt_ref": "tr_initial_001",
+  "non_claims": [
+    "Personhood-bound export does not make any wallet the person.",
+    "Personhood-bound export does not make any portrait biometric proof by default.",
+    "Personhood-bound export does not authorize public correlation of all identity contexts."
+  ]
+}
