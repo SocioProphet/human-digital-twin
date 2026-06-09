@@ -35,6 +35,7 @@ The kit is intentionally modular:
 - **Schemas**: JSON Schema for the on-wire / on-disk representation of an Ω-evaluable extension.
 - **TritRPC surface**: a YAML service contract (wire-format first; runtime second).
 - **Pathflows**: a terminal runner that simulates progression across the lattice for regression tests and demos.
+- **Personhood-bound export readiness**: schema-light doctrine and fixtures for exporting scoped person-bound assurance claims without raw personhood evidence leakage.
 
 Nothing here is “the product.” It’s the **shared contract** we can embed into SourceOS/Sociosphere-style systems:
 policy-guarded, audit-evidenced, human-consented, and composable.
@@ -48,12 +49,15 @@ Start here if you are new to the project:
 - **README (this file):** Quick mental model, repo layout, and how to run the examples.
 - **Theory and foundations:** `docs/theory.md` — deeper rationale, terms, and design trade-offs.
 - **Best practices:** `docs/best_practices.md` — operational and safety guidance.
+- **Personhood-bound export readiness:** `docs/personhood-bound-export-readiness.md` — scoped export posture for person-bound identity claims.
 
 If you want to build or integrate:
 
 - **Schemas:** `human_digital_twin/api/schemas/kfs-eval.json`
 - **Policies:** `human_digital_twin/api/policies/opa/`
 - **API contract:** `human_digital_twin/api/trpc/devine.trpc.yaml`
+- **Personhood-bound export fixtures:** `examples/personhood_bound_export.example.json`, `examples/personhood_bound_export.rejected.raw_evidence.json`
+- **Personhood-bound export validator:** `tools/validate_personhood_bound_export.py`
 
 ---
 
@@ -99,6 +103,16 @@ The Ω engine provides a *proposal* (“this looks TRUSTED”), but policy decid
 
 This split is deliberate: *math is not governance*.
 
+### 4) Personhood-bound exports are minimized assurance claims
+
+A personhood-bound export should say:
+
+```text
+This subject is person-bound at assurance level Pn for purpose Y under policy Z.
+```
+
+It should not export the raw ceremony, guardians, credentials, wallet refs, portrait refs, or recovery graph unless separately approved.
+
 ---
 
 ## Repo layout
@@ -110,6 +124,10 @@ This split is deliberate: *math is not governance*.
 - `human_digital_twin/tools/pathflows/` — terminal runner + scenarios
 - `tests/` — regression tests (promotion + schema)
 - `capd/` — capability descriptor example (CapD)
+- `docs/personhood-bound-export-readiness.md` — personhood-bound claim export and minimization profile
+- `examples/personhood_bound_export.example.json` — valid minimized personhood-bound export fixture
+- `examples/personhood_bound_export.rejected.raw_evidence.json` — rejected raw-evidence export fixture
+- `tools/validate_personhood_bound_export.py` — stdlib semantic validator for personhood-bound export fixtures
 
 ---
 
@@ -140,6 +158,12 @@ print(data.decode())
 PY
 ```
 
+Validate personhood-bound export fixtures:
+
+```bash
+python3 tools/validate_personhood_bound_export.py
+```
+
 ---
 
 ## Best practices (the boring safety rails)
@@ -150,6 +174,7 @@ PY
 4. **Separate compute from governance.** Keep the Ω engine deterministic and testable; keep policy explicit and reviewable.
 5. **Repair is mandatory.** When inputs violate invariants, we don’t “force success”; we generate a repair plan and stop.
 6. **Minimize.** Export the smallest sufficient artifact; keep raw private evidence local by default.
+7. **Do not export raw personhood evidence by default.** Personhood-bound exports should expose scoped assurance, not raw ceremony evidence.
 
 ---
 
@@ -167,3 +192,4 @@ Omega lattice, OPA policy gates, schema, and TritRPC surface.
 - Replace the shim protocol with the real wire format + auth + evidence envelopes.
 - Expand schema to a full FHIR-compatible Extension profile (if we want interoperability).
 - Add de-identification scoring, measurement provenance, and audit evidence outputs.
+- Wire personhood-bound export readiness into OPA policy examples and pathflow scenarios.
