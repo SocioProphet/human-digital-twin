@@ -1,0 +1,60 @@
+version: 0.2
+service: BodyTwin
+transport:
+  kind: tritrpc
+  # Reference address for local testing (UDS). Real deployments set this via runtime config.
+  address: unix:///tmp/body_twin.sock
+
+# The services-phase surface for the twin-as-body-state-model (docs/BODY_STATE_MODEL.md).
+# Wire-format-first: this contract stands up BEFORE the runtime. Three long-running
+# operations turn the body-state contract (api/schemas/body-state/body-state-model.schema.json)
+# into a live, predictive, GOVERNED twin. The gate is not a separate concern bolted on later —
+# it is carried in the wire format: Evolve returns a `reconciliation` verdict and an
+# `actuation_posture`, so "learned proposes, physics disposes" is a property of the contract,
+# not just the implementation.
+rpcs:
+  # ── state estimation: keep x(t) synchronized to the physical body ──
+  - name: Estimate
+    # Assimilate a batch of consented observations into the current state x(t).
+    req:
+      twin_id: string
+      observations: [{source: string, code: string, value: number, unit: string, ts: string}]
+      prev_state_ref: string        # handle to the prior x(t); MAY be empty for a cold start
+    res:
+      state_ref: string             # handle to the updated x(t)
+      innovation_norm: number       # residual vs prediction; large => model/sensor divergence
+      omega: string                 # readiness of the estimated state (Ω lattice)
+
+  # ── the model representation as a service: evolve x(t) -> x(t+1) ──
+  - name: Evolve
+    # Step the dynamical model forward. The mechanistic backbone runs under verified compute;
+    # the learned surrogate proposes the residual; the gate reconciles. The RESPONSE encodes the
+    # verdict and the resulting actuation posture so no caller can treat an unverified step as
+    # actionable.
+    req:
+      twin_id: string
+      state_ref: string
+      horizon_s: number
+      kind: string                  # forecast | counterfactual | risk
+      allow_learned: bool           # caller opt-in to the learned surrogate; physics still disposes
+    res:
+      predicted_state_ref: string
+      reconciliation: string        # physics_verified | physics_adjusted | learned_only | divergent | not_run
+      verified_compute: bool        # true iff the mechanistic step executed under the gate
+      actuation_posture: string     # blocked_by_default | simulation_only | protocol_required (never 'approved' from here)
+      omega: string                 # capped at TRUSTED when reconciliation in {learned_only, divergent}
+      confidence: number
+
+  # ── Ω boundary check: may this state/prediction cross a boundary? ──
+  - name: EvaluateState
+    # Bridge to the Ω promotion engine (see DevineIntelligence.Evaluate) for a body-state artifact:
+    # returns the readiness state AND the mandatory policy decision. Validity is not permission.
+    req:
+      state_ref: string
+      prev: string                  # previous omega state; default "ABSENT"
+      boundary: string              # export | delegation | actuation | publication
+    res:
+      omega: string
+      policy_decision: string       # allow | deny | block | needs_review
+      consent_present: bool
+      reasons: [string]
