@@ -1,0 +1,153 @@
+{
+  "$id": "https://socioprophet.dev/schema/body-state/body-state-model.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Human Digital Twin — Body-State Model x(t)",
+  "description": "The twin as a digital STATE MODEL of a human body: the live estimated state x(t) of organ-compartment sub-systems, kept synchronized to the physical person by state estimation, plus the DYNAMICAL MODEL that evolves x(t)->x(t+1) (the 'model representation'). A stored state is not a twin; the dynamical model makes it predictive. Because x(t) and its predictions are dispositive personal data that may cross a boundary (clinician export, agent delegation, actuation), every instance carries an Ω readiness state and the Human Protection Envelope — validity is not permission.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "twin_id": {"type": "string", "minLength": 1, "description": "stable id of this body twin instance"},
+    "profile_id": {"type": "string", "minLength": 1, "description": "the physical person this twin models"},
+    "as_of": {"type": "string", "format": "date-time", "description": "the instant x(t) is estimated for"},
+    "omega_state": {
+      "description": "readiness of this state/prediction to cross a boundary (Ω lattice, human-protection-envelope.json)",
+      "enum": ["ABSENT", "SEEDED", "NORMALIZED", "LINKED", "TRUSTED", "ACTIONABLE", "DELIVERED"]
+    },
+    "compartments": {
+      "type": "array",
+      "minItems": 1,
+      "description": "organ-compartment state vectors (cardio, metabolic, immune, neuro, ...); each is a piece of x(t)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "system": {"enum": ["cardio", "respiratory", "metabolic", "renal", "hepatic", "immune", "neuro", "endocrine", "musculoskeletal", "hematologic", "other"]},
+          "variables": {
+            "type": "array",
+            "minItems": 1,
+            "description": "the state variables of this compartment, each with an estimate and its uncertainty",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "value": {"type": "number"},
+                "unit": {"type": "string"},
+                "estimate_sd": {"type": "number", "minimum": 0, "description": "posterior std-dev from state estimation (uncertainty is first-class)"},
+                "fhir_code": {"type": "string", "description": "optional LOINC/FHIR Observation code for interoperability"}
+              },
+              "required": ["name", "value", "unit"]
+            }
+          }
+        },
+        "required": ["system", "variables"]
+      }
+    },
+    "state_estimation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "how x(t) is synchronized to the physical body from sensor streams",
+      "properties": {
+        "method": {"enum": ["kalman", "ekf", "ukf", "particle", "variational_assimilation", "none"]},
+        "sync_interval_ms": {"type": "number", "minimum": 0},
+        "sensor_refs": {"type": "array", "items": {"type": "string"}, "description": "consented sensor/observation sources fused into this estimate (biometrics, HRV, kinematics, labs, wearables, EHR)"},
+        "innovation_norm": {"type": "number", "minimum": 0, "description": "residual between prediction and latest observation; a large innovation flags model/sensor divergence"},
+        "last_sync": {"type": "string", "format": "date-time"}
+      },
+      "required": ["method", "sensor_refs"]
+    },
+    "dynamical_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "THE MODEL REPRESENTATION — the model that evolves x(t)->x(t+1). Hybrid by design: a mechanistic backbone (verified compute) plus a learned surrogate (the personal residual), reconciled by the gate.",
+      "properties": {
+        "mechanistic": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "physiology ODEs / PK-PD / compartment dynamics — explicit, interpretable, verifiable",
+          "properties": {
+            "model_ref": {"type": "string", "minLength": 1, "description": "id/version of the mechanistic model"},
+            "verified_compute": {"type": "boolean", "description": "true iff the forward step was executed under the verified-compute gate (not a free-text guess)"}
+          },
+          "required": ["model_ref", "verified_compute"]
+        },
+        "learned": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "data-driven surrogate for what the equations miss; distilled from the person's own consented history (never generic web data, never model-of-model slop)",
+          "properties": {
+            "model_ref": {"type": "string", "minLength": 1},
+            "weights_sbom_ref": {"type": "string", "description": "attestation/SBOM entry for the served weights (model-governance-ledger)"},
+            "trained_on": {"enum": ["personal_consented", "cohort_consented", "authored_canon", "mixed"], "description": "provenance class of the training data"},
+            "reproduced_by_us": {"type": "boolean"}
+          },
+          "required": ["model_ref", "trained_on"]
+        },
+        "reconciliation": {
+          "enum": ["physics_verified", "physics_adjusted", "learned_only", "divergent", "not_run"],
+          "description": "how the learned proposal and the mechanistic step were reconciled by the gate. learned proposes, physics disposes: 'learned_only'/'divergent' MUST NOT drive human actuation."
+        }
+      },
+      "required": ["mechanistic", "reconciliation"]
+    },
+    "prediction": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "optional forward run of the dynamical model (what-if / risk / forecast)",
+      "properties": {
+        "horizon_s": {"type": "number", "minimum": 0},
+        "kind": {"enum": ["forecast", "counterfactual", "risk"]},
+        "target": {"type": "string", "description": "which state variable(s) the prediction is about"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "required": ["horizon_s", "kind"]
+    },
+    "protection": {
+      "description": "the Human Protection Envelope for this state/prediction — consent, privacy, physical/cognitive safety, policy decision, provenance. Reused, not re-specified.",
+      "$ref": "../hpl/human-protection-envelope.json"
+    }
+  },
+  "required": [
+    "twin_id",
+    "profile_id",
+    "as_of",
+    "omega_state",
+    "compartments",
+    "state_estimation",
+    "dynamical_model",
+    "protection"
+  ],
+  "allOf": [
+    {
+      "$comment": "Safety gate: a state whose forward model was learned-only or divergent (physics did not verify it) must not be exportable-as-actionable and must not drive human actuation.",
+      "if": {
+        "properties": {"dynamical_model": {"properties": {"reconciliation": {"enum": ["learned_only", "divergent"]}}, "required": ["reconciliation"]}},
+        "required": ["dynamical_model"]
+      },
+      "then": {
+        "properties": {
+          "omega_state": {"enum": ["ABSENT", "SEEDED", "NORMALIZED", "LINKED", "TRUSTED"]},
+          "protection": {"properties": {"physical_safety": {"properties": {"human_actuation": {"enum": ["blocked", "blocked_by_default", "simulation_only"]}}, "required": ["human_actuation"]}}, "required": ["physical_safety"]}
+        }
+      }
+    },
+    {
+      "$comment": "Ω promotion floor: an ACTIONABLE/DELIVERED body state requires present consent and an allow policy decision (validity is not permission).",
+      "if": {
+        "properties": {"omega_state": {"enum": ["ACTIONABLE", "DELIVERED"]}},
+        "required": ["omega_state"]
+      },
+      "then": {
+        "properties": {
+          "protection": {
+            "properties": {
+              "consent": {"properties": {"present": {"const": true}}, "required": ["present"]},
+              "policy": {"properties": {"decision": {"const": "allow"}}, "required": ["decision"]}
+            },
+            "required": ["consent", "policy"]
+          }
+        }
+      }
+    }
+  ]
+}
