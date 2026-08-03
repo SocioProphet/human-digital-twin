@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twin Simulation Model — Light Cone of Time &amp; Uncertainty</title>
+<style>
+  :root{
+    /* deep-space (default / dark) */
+    --bg:#080b12; --bg2:#0d1220; --panel:#111830; --panel-2:#0f1526;
+    --ink:#eaf0fb; --ink-soft:#a9b6d4; --ink-faint:#6b779a; --line:#20293f;
+    --gold:#e8b84b; --gold-soft:#f2d383; --teal:#3fb8b0; --blue:#3a72c4; --blue-deep:#22406f;
+    --pos:#e8b84b; --neg:#3a72c4;
+    --star:rgba(255,255,255,.55);
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --grad-top:#e8b84b; --grad-mid:#3fb8b0; --grad-bot:#22406f;
+  }
+  @media (prefers-color-scheme:light){
+    :root{ /* blueprint */
+      --bg:#eef1f6; --bg2:#e5e9f2; --panel:#ffffff; --panel-2:#f5f7fb;
+      --ink:#12203a; --ink-soft:#3f5170; --ink-faint:#8593ad; --line:#d5dcea;
+      --gold:#b6841a; --gold-soft:#caa245; --teal:#1d8f88; --blue:#2b5aa6; --blue-deep:#1f3f74;
+      --pos:#b6841a; --neg:#2b5aa6; --star:rgba(40,60,110,.35);
+      --grad-top:#d9a52f; --grad-mid:#2f9a92; --grad-bot:#2b5aa6;
+    }
+  }
+  :root[data-theme="dark"]{--bg:#080b12;--bg2:#0d1220;--panel:#111830;--panel-2:#0f1526;--ink:#eaf0fb;--ink-soft:#a9b6d4;--ink-faint:#6b779a;--line:#20293f;--gold:#e8b84b;--gold-soft:#f2d383;--teal:#3fb8b0;--blue:#3a72c4;--blue-deep:#22406f;--pos:#e8b84b;--neg:#3a72c4;--star:rgba(255,255,255,.55);--grad-top:#e8b84b;--grad-mid:#3fb8b0;--grad-bot:#22406f;}
+  :root[data-theme="light"]{--bg:#eef1f6;--bg2:#e5e9f2;--panel:#ffffff;--panel-2:#f5f7fb;--ink:#12203a;--ink-soft:#3f5170;--ink-faint:#8593ad;--line:#d5dcea;--gold:#b6841a;--gold-soft:#caa245;--teal:#1d8f88;--blue:#2b5aa6;--blue-deep:#1f3f74;--pos:#b6841a;--neg:#2b5aa6;--star:rgba(40,60,110,.35);--grad-top:#d9a52f;--grad-mid:#2f9a92;--grad-bot:#2b5aa6;}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(120% 80% at 50% 6%, var(--bg2), var(--bg) 60%);
+    color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 22px 90px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:0 0 12px}
+  h1{font-size:clamp(26px,4.4vw,44px);line-height:1.04;margin:0;letter-spacing:-.02em;text-wrap:balance;
+     max-width:20ch}
+  .lede{color:var(--ink-soft);max-width:66ch;margin:14px 0 0;font-size:16px}
+  .lede b{color:var(--ink);font-weight:600}
+
+  /* symmetry-forming sequence */
+  .seq{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:34px 0 6px;
+    padding:16px 18px;background:var(--panel-2);border:1px solid var(--line);border-radius:14px}
+  .seq .cap{font-family:var(--mono);font-size:11px;color:var(--ink-faint);letter-spacing:.08em;margin-left:auto}
+  .arrow{color:var(--ink-faint);font-size:18px}
+  .seq svg{display:block}
+
+  /* hero stage */
+  .stage{position:relative;margin:22px 0 8px;border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(180deg,var(--panel) 0%, var(--panel-2) 100%);overflow:hidden}
+  .stars{position:absolute;inset:0;pointer-events:none;opacity:.9;
+    background-image:
+      radial-gradient(1.2px 1.2px at 12% 78%, var(--star), transparent 60%),
+      radial-gradient(1px 1px at 26% 88%, var(--star), transparent 60%),
+      radial-gradient(1.4px 1.4px at 42% 92%, var(--star), transparent 60%),
+      radial-gradient(1px 1px at 58% 84%, var(--star), transparent 60%),
+      radial-gradient(1.3px 1.3px at 71% 90%, var(--star), transparent 60%),
+      radial-gradient(1px 1px at 86% 80%, var(--star), transparent 60%),
+      radial-gradient(1px 1px at 33% 70%, var(--star), transparent 60%),
+      radial-gradient(1.1px 1.1px at 64% 74%, var(--star), transparent 60%);}
+  .stage svg.cone{position:relative;display:block;width:100%;height:auto}
+  .apex-glow{transform-box:fill-box;transform-origin:center;animation:pulse 3.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.apex-glow{animation:none;opacity:.85}}
+  text{font-family:var(--sans)}
+  .t-lab{font-size:13px;fill:var(--ink)}
+  .t-soft{font-size:12px;fill:var(--ink-soft)}
+  .t-mono{font-family:var(--mono);fill:var(--ink-soft)}
+  .t-pos{fill:var(--pos);font-weight:600}
+  .t-neg{fill:var(--neg);font-weight:600}
+
+  h2{font-size:12.5px;font-family:var(--mono);letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-faint);margin:52px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  .card h3{margin:0 0 6px;font-size:17px;letter-spacing:-.01em}
+  .card p{margin:8px 0 0;color:var(--ink-soft);font-size:14.5px}
+  .card p b{color:var(--ink);font-weight:600}
+  .eqn{font-family:var(--mono);font-size:22px;color:var(--gold);text-align:center;margin:18px 0 6px;
+    letter-spacing:.02em}
+  .eqn .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 4px}
+  .eqn .frac span{line-height:1.1}
+  .eqn .frac .d{border-top:1.5px solid var(--gold);padding-top:2px}
+
+  /* bridge: three-clock instrument */
+  .bridge{background:linear-gradient(180deg,var(--panel) , var(--panel-2));border:1px solid var(--line);
+    border-radius:16px;padding:26px 26px 20px}
+  .bridge .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal)}
+  .clocks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+  @media(max-width:640px){.clocks{grid-template-columns:1fr}}
+  .clock{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .clock .nm{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.05em}
+  .clock .ds{font-size:13px;color:var(--ink-soft);margin-top:6px}
+  .resid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  @media(max-width:640px){.resid{grid-template-columns:1fr 1fr}}
+  .r{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .r .sym{font-family:var(--mono);font-size:15px;color:var(--teal);font-weight:600}
+  .r .lab{font-size:12px;color:var(--ink-soft);margin-top:5px}
+  .floor{margin-top:16px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:10px;align-items:flex-start}
+  .floor .k{font-family:var(--mono);color:var(--gold);white-space:nowrap}
+  .prov{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:18px;
+    border-top:1px solid var(--line);padding-top:12px}
+  .prov a{color:var(--teal);text-decoration:none}
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:22px;height:8px;border-radius:4px;display:inline-block}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Digital Twin · Conceptual Substrate</p>
+  <h1>The light cone of time &amp; uncertainty</h1>
+  <p class="lede">How the simulation represents <b>time, causality, and uncertainty</b> at its most fundamental
+    level: a universal process of spherical symmetry forming and breaking. The convex outer surface carries
+    <b>positive charge / emission</b>; the concave inner surface carries <b>negative charge / absorption</b>;
+    the apex is a continuous exchange of energy — the thing the twin measures as time.</p>
+
+  <!-- symmetry-forming sequence -->
+  <div class="seq" aria-label="Spherical symmetry forming and breaking">
+    <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="18" fill="var(--pos)" opacity=".85"/><text x="23" y="28" text-anchor="middle" font-size="18" fill="#0b0f18" font-weight="700">+</text></svg>
+    <span class="arrow">→</span>
+    <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="18" fill="var(--neg)" opacity=".85"/><text x="23" y="29" text-anchor="middle" font-size="20" fill="#eaf0fb" font-weight="700">−</text></svg>
+    <span class="arrow">→</span>
+    <svg width="52" height="46" viewBox="0 0 52 46"><circle cx="23" cy="23" r="18" fill="var(--pos)" opacity=".85"/><path d="M23 5 A18 18 0 0 1 23 41 L23 23 Z" fill="var(--neg)" opacity=".9"/></svg>
+    <span class="arrow">→</span>
+    <svg width="70" height="40" viewBox="0 0 70 40"><ellipse cx="35" cy="24" rx="30" ry="10" fill="none" stroke="var(--gold)" stroke-width="1.4"/><ellipse cx="35" cy="24" rx="20" ry="6.5" fill="none" stroke="var(--gold)" stroke-width="1.1" opacity=".7"/><ellipse cx="35" cy="24" rx="10" ry="3.2" fill="var(--gold)" opacity=".8"/></svg>
+    <span class="cap">sphere → charge split → slice → 2-surface across time</span>
+  </div>
+
+  <!-- HERO: light cone -->
+  <div class="stage">
+    <div class="stars" aria-hidden="true"></div>
+    <svg class="cone" viewBox="0 0 640 580" role="img"
+      aria-label="Light cone: apex of energy exchange at the bottom widening upward into the uncertain future; gold future and emission above, deep blue past and absorption below.">
+      <defs>
+        <linearGradient id="cone" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--grad-top)" stop-opacity=".92"/>
+          <stop offset="0.5" stop-color="var(--grad-mid)" stop-opacity=".55"/>
+          <stop offset="1" stop-color="var(--grad-bot)" stop-opacity=".18"/>
+        </linearGradient>
+        <radialGradient id="apex" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="var(--gold-soft)"/>
+          <stop offset="1" stop-color="var(--gold)" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- vertical time axis -->
+      <line x1="320" y1="512" x2="320" y2="52" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="3 5"/>
+      <path d="M320 46 l-6 12 h12 z" fill="var(--ink-soft)"/>
+      <text class="t-pos" x="320" y="34" text-anchor="middle" font-size="15">Positive  +</text>
+      <text class="t-soft" x="332" y="70" font-size="12">↑ uncertain future</text>
+
+      <!-- cone body -->
+      <path d="M140 96 A180 34 0 0 0 500 96 L320 500 Z" fill="url(#cone)" stroke="var(--gold)" stroke-opacity=".5" stroke-width="1"/>
+      <ellipse cx="320" cy="96" rx="180" ry="34" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-opacity=".9"/>
+
+      <!-- light rings -->
+      <ellipse cx="320" cy="170" rx="145" ry="27" fill="none" stroke="var(--ink)" stroke-opacity=".28" stroke-width="1"/>
+      <ellipse cx="320" cy="250" rx="110" ry="20" fill="none" stroke="var(--ink)" stroke-opacity=".26" stroke-width="1"/>
+      <ellipse cx="320" cy="330" rx="75"  ry="14" fill="none" stroke="var(--ink)" stroke-opacity=".24" stroke-width="1"/>
+      <ellipse cx="320" cy="410" rx="40"  ry="8"  fill="none" stroke="var(--ink)" stroke-opacity=".22" stroke-width="1"/>
+
+      <!-- you are here -->
+      <ellipse cx="320" cy="128" rx="163" ry="30" fill="none" stroke="var(--gold-soft)" stroke-width="1.6" stroke-dasharray="2 4"/>
+      <circle cx="320" cy="128" r="4.5" fill="var(--gold-soft)"/>
+      <text class="t-lab" x="320" y="120" text-anchor="middle" font-weight="600" font-size="14">You are here</text>
+
+      <!-- apex: energy exchange -->
+      <circle cx="320" cy="500" r="46" fill="url(#apex)" class="apex-glow"/>
+      <circle cx="320" cy="500" r="6" fill="var(--gold-soft)"/>
+      <text class="t-neg" x="320" y="548" text-anchor="middle" font-size="15">Negative  −</text>
+      <text class="t-soft" x="320" y="566" text-anchor="middle" font-size="11.5">apex = photon absorption ⇄ emission</text>
+
+      <!-- space axes near apex -->
+      <line x1="320" y1="470" x2="470" y2="470" stroke="var(--ink-faint)" stroke-width="1.1"/>
+      <path d="M476 470 l-12 -5 v10 z" fill="var(--ink-faint)"/>
+      <text class="t-mono" x="482" y="474" font-size="12">X · space</text>
+      <line x1="320" y1="470" x2="212" y2="428" stroke="var(--ink-faint)" stroke-width="1.1"/>
+      <path d="M206 425 l13 0 -6 9 z" fill="var(--ink-faint)"/>
+      <text class="t-mono" x="176" y="420" font-size="12">Z</text>
+
+      <!-- photon paths -->
+      <path d="M336 486 C 430 470, 470 452, 520 440" fill="none" stroke="var(--gold)" stroke-width="1.6"/>
+      <path d="M516 438 l10 -1 -6 9 z" fill="var(--gold)"/>
+      <text class="t-mono" x="470" y="430" font-size="11" fill="var(--gold)">emission · outer</text>
+      <path d="M336 492 C 400 490, 430 496, 468 508" fill="none" stroke="var(--blue)" stroke-width="1.6"/>
+      <path d="M472 510 l-10 -3 3 10 z" fill="var(--blue)"/>
+      <text class="t-mono" x="360" y="524" font-size="11" fill="var(--blue)">absorption · inner</text>
+    </svg>
+  </div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--gold)"></i> convex outer · positive charge · emission · future</span>
+    <span><i class="sw" style="background:var(--blue)"></i> concave inner · negative charge · absorption · past</span>
+  </div>
+
+  <!-- uncertainty -->
+  <h2>The 4π sphere of uncertainty</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Two surfaces across one time axis</h3>
+      <p>The two-dimensional surface of the sphere runs <b>across the vertical time axis</b>; the time axis sits
+      at right angles to the space axes because electromagnetic fields are always mutually perpendicular. Symmetry
+      forms and breaks continuously — a dynamic boundary condition, never a static state.</p>
+      <p>Because the universe is never at absolute zero, this exchange <b>never stops</b> — which is exactly why
+      the twin can treat time as a measured, continuous process rather than a fixed coordinate.</p>
+    </div>
+    <div class="card">
+      <h3>Heisenberg at the smallest scale</h3>
+      <p>At the finest grain the sphere of uncertainty is bounded by the uncertainty principle — position and
+      momentum cannot both be pinned:</p>
+      <div class="eqn">Δx · Δp &gt;
+        <span class="frac"><span>ħ</span><span class="d">4π</span></span>
+      </div>
+      <p style="text-align:center;font-size:12.5px">the 4π is the full solid angle of the sphere the twin samples over</p>
+    </div>
+  </div>
+
+  <!-- BRIDGE to the shipped instrument -->
+  <h2>In the twin, this uncertainty becomes measurable</h2>
+  <div class="bridge">
+    <span class="tag">Domain-22 · three-clock observability · shipped</span>
+    <h3 style="margin:10px 0 0;font-size:18px">The apex is where three clocks are read at once</h3>
+    <p style="color:var(--ink-soft);margin:8px 0 0;max-width:70ch;font-size:14.5px">
+      The conceptual light cone above is realised as a running instrument. Every observation the twin makes is
+      stamped on three notions of time; the disagreement between them is the uncertainty sphere, made numeric —
+      and the reading <b style="color:var(--ink)">fails closed</b> when there isn't enough evidence to trust it.</p>
+
+    <div class="clocks">
+      <div class="clock"><div class="nm">wall</div><div class="ds">physical clock — the space axis of the diagram</div></div>
+      <div class="clock"><div class="nm">causal</div><div class="ds">Lamport-style order — the time axis, at right angles to wall</div></div>
+      <div class="clock"><div class="nm">epoch</div><div class="ds">generation phase — which turn of the symmetry we're in</div></div>
+    </div>
+
+    <div class="resid">
+      <div class="r"><div class="sym">ε_order</div><div class="lab">wall vs causal disagreement (Kendall)</div></div>
+      <div class="r"><div class="sym">staleness</div><div class="lab">worst gap between readings</div></div>
+      <div class="r"><div class="sym">ε_rate</div><div class="lab">observed vs expected tick rate</div></div>
+      <div class="r"><div class="sym">ε_phase</div><div class="lab">epoch vs wall-predicted phase</div></div>
+    </div>
+
+    <div class="floor">
+      <span class="k">n ≥ 30 ⟂</span>
+      <span>Below the sample floor — or with a collapsed wall span — the instrument abstains rather than
+        reporting a confident-but-empty number. A control that reports on three samples is not measuring anything.</span>
+    </div>
+
+    <div class="prov">
+      shipped as <a href="https://github.com/SocioProphet/ProCybernetica/pull/121">ProCybernetica#121</a>
+      · procyber/observability/three_clock.py · stdlib-only · teeth both ways (10 tests)
+      · the buildable slice of the doc3 “time-as-ordering-field” model — the deeper physics stays research, not code.
+    </div>
+  </div>
+
+  <footer>
+    <span>SocioProphet · digital-twin conceptual substrate</span>
+    <span>twin-lightcone-model · v1</span>
+  </footer>
+</div>
+</body>
+</html>
