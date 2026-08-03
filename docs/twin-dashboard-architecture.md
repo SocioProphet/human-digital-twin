@@ -65,6 +65,33 @@ canonical epistemic lattice (`usol projection.py`, PR #4):
 This is the rule that prevents adopting the art as a rival vocabulary: **every lens is a governed,
 capped, graduatable projection over real ephemeris + the canonical coordinate space.**
 
+## FLOW / ANALYTICS surface — agent-workflow traces (our stack, not a foreign one)
+
+The mesh isn't only sensing nodes; it's **agents handing off work**. The twin needs a
+trace/span view of that — a run tree of agents, handoffs, tool calls, and per-step verdicts, so an
+operator can see *how* a result was produced and where it degraded. This is the FLOW/ANALYTICS ring
+made operable.
+
+**Alignment guardrail (hard):** reference trace tools from the OpenAI Agents SDK / **Codex**
+(`/v1/responses`, `Codex MCP`, `transfer_to_<agent>`) show the *capability* we want — they are **not**
+the stack we adopt (estate rule: no Codex anywhere). We already have the trace/span substrate to
+render our **own** workflows:
+
+- **dispatch-ledger** (`Noetica agent-machine`, `DispatchEntry`) — the per-step agent trace: parent
+  linked via `prev`, each step carrying a `verdict` and an `attestation`. It already maps to the
+  canonical **ProofPack** (`dispatch-proof-pack`, Noetica#603), so every span is evidence-bound.
+- **sp-orchestrator** DAG runs — the agent/handoff topology (nodes = agents/steps, edges = handoffs),
+  loop-as-DAG governed.
+- **TriTRPC** receipt binding — one trace, span-per-hop parent-linked, `rpc.hop.sealed` events
+  (owner-sealed, so a span is complete to the owner, cloaked to observers).
+- **three-clock / `sensor_mesh`** — the same coherence analytics grade each span's timing
+  (stale/out-of-order/rate-drift), fail-closed below `n ≥ 30`.
+
+So the agent-workflow trace viewer renders **dispatch-ledger + sp-orchestrator DAG + TriTRPC spans**,
+each span ProofPack-bound and epistemically typed — the SAME lattice and provenance spine as the rest
+of the twin. A handoff is an edge in the DAG; a "span detail" is a `DispatchEntry`'s ProofPack; a
+failed step is a `NEG` verdict, not a hidden retry.
+
 ## Availability (what exists vs. the gap)
 
 **Have:** ephemeris (`usol horizons`, `client-vue/src/space/ephemeris.ts`); the cone (`usol fov`);
