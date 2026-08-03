@@ -37,3 +37,10 @@ OPA is excellent for:
 - default-deny + explicit allow,
 - explaining why something was blocked,
 - emitting structured triggers for repair pipelines.
+
+## See also
+
+- [Twin time & uncertainty: the light-cone model](./twin-time-uncertainty-model.md) — the twin's
+  representation of *time* and the confidence attached to any temporal claim (the readiness lattice
+  governs *whether* an artifact may cross; this governs *when*). Includes a rendered visualization
+  and the shipped three-clock observability instrument.
